@@ -18,7 +18,7 @@ if (process.argv.length < 3) {
 const filePath = path.resolve(process.argv[2]);
 const ext = path.extname(filePath).toLowerCase();
 
-// CSV/TSV — read directly, no parsing needed
+// CSV/TSV -- read directly, no parsing needed
 if (ext === '.csv' || ext === '.tsv') {
   console.log(fs.readFileSync(filePath, 'utf-8'));
   process.exit(0);
@@ -35,7 +35,7 @@ if (fs.existsSync(pyScript)) {
   } catch (_) { /* fall through */ }
 }
 
-// Fallback: PowerShell COM object — no row cap (removed the 200-row limit)
+// Fallback: PowerShell COM object -- no row cap (removed the 200-row limit)
 try {
   const escapedPath = filePath.replace(/'/g, "''");
   const tmpPs = path.join(os.tmpdir(), 'aionui-read-xlsx-opt.ps1');
@@ -77,7 +77,7 @@ try {
   if (result.trim()) { console.log(result); process.exit(0); }
 } catch (_) { /* fall through */ }
 
-// Last resort: XLSX is a ZIP — extract shared strings + sheet XML
+// Last resort: XLSX is a ZIP -- extract shared strings + sheet XML
 try {
   const escapedPath = filePath.replace(/'/g, "''");
   const cmd = `powershell -Command "Add-Type -A 'System.IO.Compression.FileSystem'; $z = [IO.Compression.ZipFile]::OpenRead('${escapedPath}'); $sheets = $z.Entries | Where-Object { $_.FullName -match 'xl/worksheets/sheet[0-9]+\\.xml$' } | Sort-Object FullName; foreach ($s in $sheets) { $r = New-Object IO.StreamReader($s.Open()); $xml = $r.ReadToEnd(); $r.Close(); $xml = $xml -replace '<[^>]+>', ' '; $xml = $xml.Trim() -replace '\\s+', '\\t'; Write-Output $xml }; $z.Dispose()"`;
